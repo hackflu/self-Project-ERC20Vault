@@ -27,7 +27,6 @@ contract RewardToken is ERC20, Ownable,AccessControl{
         _grantRole(MINTER_ROLE, msg.sender);
     }
 
-
     function mintToken(address to, uint256 amount) external onlyOwner{
         if(alreadyMinted + amount > fixedSupply){
             revert RewardToken__Overflow();
