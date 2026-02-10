@@ -1,7 +1,114 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract ERC20Vault {
+/**
+ * @title ERC20Vault with Universal upgradeable proxy standard
+ * @author hackFlu
+ * @notice a simple contract with secuirty feature
+ */
+contract ERC20Vault is Initializable, OwnableUpgradeable {
+    /*//////////////////////////////////////////////////////////////
+                            TYPE DECLERATION
+    //////////////////////////////////////////////////////////////*/
+    struct UserInfo {
+        uint256 balances;
+        uint256 lastUpdatedTime;
+        bool isClaimed;
+    }
 
+    /// @custom:storage-location erc7201:ERC20Vault.storage.main
+    struct VaultStorage {
+        IERC20 token;
+        uint256 totalAssets;
+        mapping(address => UserInfo) userInfos;
+        uint256 totalShares;
+        uint256 rewardPerTokenStored;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                  ERROR
+    //////////////////////////////////////////////////////////////*/
+    error ERC20Vault__AddressZero();
+    error ERC20Vault__AtleastOneEth();
+
+    /*//////////////////////////////////////////////////////////////
+                               CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+    constructor() {
+        _disableInitializers();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            EXTERNAL FUNCTION
+    //////////////////////////////////////////////////////////////*/
+    function deposit() external payable {
+        // check
+        if (msg.sender == address(0)) {
+            revert ERC20Vault__AddressZero();
+        }
+        if (msg.value > 1) {
+            revert ERC20Vault__AtleastOneEth();
+        }
+        // Effect
+        _setDepositAndTransfer(msg.sender, msg.value);
+    }
+
+    /// @notice withdraw amount.
+    /// @dev emits an event WithdrawlSuccessful.
+    /// @param amount a parameter to insert amount to withdraw.
+    function withdraw(uint256 amount) external {}
+
+    /// @notice just to claim the reward.
+    /// @dev Emit the event ClaimSuccessful.
+    /// @param amount a parameter to insert amount to claim
+    function calimReward(uint256 amount) external {}
+
+    /*//////////////////////////////////////////////////////////////
+                             PUBLIC FUNCTION
+    //////////////////////////////////////////////////////////////*/
+    function initialize(address token, uint256 rewardPerTokenStored) public initializer {
+        __Ownable_init(msg.sender);
+        VaultStorage storage vault = _getStorageLocation();
+        vault.token = IERC20(token);
+        vault.totalAssets = 0;
+        vault.rewardPerTokenStored = rewardPerTokenStored;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL FUNCTION
+    //////////////////////////////////////////////////////////////*/
+    function _getStorageLocation() internal pure returns (VaultStorage storage vault) {
+        assembly {
+            vault.slot := 0x89e4a766281ae1b2ba7258575ff0092717fad3568422663a082821937e6c1100
+        }
+    }
+
+    function _convertToShare(uint256 assets, uint256 supply, uint256 pool) internal pure returns (uint256) {
+        if (supply == 0) {
+            return assets;
+        }
+        uint256 totalShare = (assets * (supply + 1)) / (pool + 1);
+        return totalShare;
+    }
+
+    function _setDepositAndTransfer(address user, uint256 assetDepoisted) internal {
+        VaultStorage storage vault = _getStorageLocation();
+        uint256 totalShare = vault.totalShares;
+        uint256 totalAssets = vault.totalAssets;
+        uint256 share = _convertToShare(assetDepoisted, totalShare, totalAssets);
+
+        vault.totalAssets = totalAssets + assetDepoisted;
+        vault.totalShares = totalShare + share;
+
+        UserInfo storage userInfo = vault.userInfos[user];
+        userInfo.balances += share;
+        userInfo.lastUpdatedTime = block.timestamp;
+        userInfo.isClaimed = false;
+
+        // interaction
+        vault.token.transfer(msg.sender, msg.value);
+    }
 }
