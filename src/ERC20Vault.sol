@@ -69,7 +69,7 @@ contract ERC20Vault is Initializable, OwnableUpgradeable {
     /*//////////////////////////////////////////////////////////////
                              PUBLIC FUNCTION
     //////////////////////////////////////////////////////////////*/
-    function initialize(address token, uint256 rewardPerTokenStored) public initializer {
+    function initialize(address token, uint256 rewardPerTokenStored) public initializer onlyOwner {
         __Ownable_init(msg.sender);
         VaultStorage storage vault = _getStorageLocation();
         vault.token = IERC20(token);
