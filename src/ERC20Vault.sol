@@ -49,7 +49,7 @@ contract ERC20Vault is Initializable, OwnableUpgradeable {
         if (msg.sender == address(0)) {
             revert ERC20Vault__AddressZero();
         }
-        if (msg.value > 1) {
+        if (msg.value == 0) {
             revert ERC20Vault__AtleastOneEth();
         }
         // Effect
