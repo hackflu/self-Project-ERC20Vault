@@ -4,7 +4,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract RewardToken is ERC20, Ownable,AccessControl{
+contract RewardToken is ERC20, Ownable, AccessControl {
     /*//////////////////////////////////////////////////////////////
                              STATE VARIABLE
     //////////////////////////////////////////////////////////////*/
@@ -20,29 +20,28 @@ contract RewardToken is ERC20, Ownable,AccessControl{
     /*//////////////////////////////////////////////////////////////
                                 FUNCTION
     //////////////////////////////////////////////////////////////*/
-    constructor() ERC20("RewardToken", "RT") Ownable(msg.sender){ 
+    constructor() ERC20("RewardToken", "RT") Ownable(msg.sender) {}
+
+    function grantTheRole(address role) external onlyOwner {
+        _grantRole(MINTER_ROLE, role);
     }
 
-    function grantTheRole() external onlyOwner{
-        _grantRole(MINTER_ROLE, msg.sender);
-    }
-
-    function mintToken(address to, uint256 amount) external onlyOwner{
-        if(alreadyMinted + amount > fixedSupply){
+    function mintToken(address to, uint256 amount) external onlyOwner {
+        if (alreadyMinted + amount > fixedSupply) {
             revert RewardToken__Overflow();
         }
         alreadyMinted += amount;
-        _mint(to ,amount);
+        _mint(to, amount);
     }
 
     /*//////////////////////////////////////////////////////////////
                              PUBLIC FUNCTION
     //////////////////////////////////////////////////////////////*/
-    function getTotalMintedToken() public view returns (uint256){
+    function getTotalMintedToken() public view returns (uint256) {
         return alreadyMinted;
     }
 
-    function getFixedSupply() public pure returns (uint256){
+    function getFixedSupply() public pure returns (uint256) {
         return fixedSupply;
     }
 }
