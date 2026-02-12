@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract RewardToken is ERC20, Ownable, AccessControl {
+contract RewardToken is ERC20, Ownable {
     /*//////////////////////////////////////////////////////////////
                              STATE VARIABLE
     //////////////////////////////////////////////////////////////*/
     uint256 private alreadyMinted;
     uint256 private constant fixedSupply = 100_000_000 ether;
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     /*//////////////////////////////////////////////////////////////
                                   ERROR
@@ -21,10 +19,6 @@ contract RewardToken is ERC20, Ownable, AccessControl {
                                 FUNCTION
     //////////////////////////////////////////////////////////////*/
     constructor() ERC20("RewardToken", "RT") Ownable(msg.sender) {}
-
-    function grantTheRole(address role) external onlyOwner {
-        _grantRole(MINTER_ROLE, role);
-    }
 
     function mintToken(address to, uint256 amount) external onlyOwner {
         if (alreadyMinted + amount > fixedSupply) {
