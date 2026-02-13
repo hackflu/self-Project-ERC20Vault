@@ -41,6 +41,7 @@ contract ERC20VaultTestV2 is Test {
         console.log("reward token balance : ", rewardToken.balanceOf(alice));
         _;
     }
+
     function testUpgrade() public {
         vm.prank(ERC20Vault(address(proxy)).owner());
         ERC20Vault(address(proxy)).transferOwnership(address(deployScriptForUpgrade));
@@ -54,8 +55,7 @@ contract ERC20VaultTestV2 is Test {
     /**
      * @notice to check the upgraded _calculateReward function
      */
-    function testCalculateReward() public requiredToDepositAndWithdrawl{
-
+    function testCalculateReward() public requiredToDepositAndWithdrawl {
         // 1. upgrade the code
         vm.prank(ERC20Vault(address(proxy)).owner());
         ERC20Vault(address(proxy)).transferOwnership(address(deployScriptForUpgrade));
@@ -63,7 +63,7 @@ contract ERC20VaultTestV2 is Test {
         address proxies = deployScriptForUpgrade.UpgradeImplementationV1(address(proxy), address(upgradedVault));
 
         //3. another deposit (SIA)
-        vm.deal(sia , 1 ether);
+        vm.deal(sia, 1 ether);
         vm.startPrank(sia);
         ERC20VaultV2(address(proxies)).deposit{value: 1 ether}();
         vm.warp(1 days);
@@ -71,7 +71,7 @@ contract ERC20VaultTestV2 is Test {
         vm.stopPrank();
         console.log("sia balance : ", sia.balance);
         console.log("reward token of sia balance : ", rewardToken.balanceOf(sia));
-        assertGe(rewardToken.balanceOf(sia),rewardToken.balanceOf(alice));
+        assertGe(rewardToken.balanceOf(sia), rewardToken.balanceOf(alice));
     }
 }
 

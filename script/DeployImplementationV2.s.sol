@@ -6,7 +6,7 @@ import {ERC20VaultV2} from "../src/v2/ERC20VaultV2.sol";
 import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
 
 contract UpgradeImplementationV2 is Script {
-    function run(address owner) public returns(address proxies){
+    function run(address owner) public returns (address proxies) {
         address mostRecentAddress = DevOpsTools.get_most_recent_deployment("ERC1967Proxy", block.chainid);
         vm.startBroadcast(owner);
         ERC20VaultV2 upgradedVault = new ERC20VaultV2();

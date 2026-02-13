@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 
 contract RewardTokenTest is Test {
     RewardToken rewardToken;
+
     function setUp() public {
         rewardToken = new RewardToken();
     }
