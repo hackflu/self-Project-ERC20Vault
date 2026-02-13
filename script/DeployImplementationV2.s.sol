@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-
 import {Script} from "forge-std/Script.sol";
 import {ERC20Vault} from "../src/v1/ERC20Vault.sol";
 import {ERC20VaultV2} from "../src/v2/ERC20VaultV2.sol";
